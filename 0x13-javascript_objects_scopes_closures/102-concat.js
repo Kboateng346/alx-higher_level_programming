@@ -1,8 +1,20 @@
 #!/usr/bin/node
+const myObject = {
+  type: 'object',
+  value: 12
+};
 
-const fs = require('fs');
+console.log(myObject);
 
-const file0 = fs.readFileSync(process.argv[2], 'utf8');
-const file1 = fs.readFileSync(process.argv[3], 'utf8');
+myObject.incr = function () {
+  this.value++;
+};
 
-fs.writeFileSync(process.argv[4], file0 + file1);
+myObject.incr();
+console.log(myObject);
+
+myObject.incr();
+console.log(myObject);
+
+myObject.incr();
+console.log(myObject);
