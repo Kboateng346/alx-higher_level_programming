@@ -1,40 +1,22 @@
 #!/usr/bin/python3
-"""
-This script lists all lists all `State`
-objects from the database `hbtn_0e_6_usa`.
-
-Arguments:
-    mysql username (str)
-    mysql password (str)
-    database name (str)
-"""
-
+""" a script that lists all State objects from the database hbtn_0e_6_usa """
 import sys
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
-from sqlalchemy.engine.url import URL
-
 from model_state import Base, State
+from sqlalchemy import create_engine, asc
+from sqlalchemy.orm import sessionmaker
 
 
-if __name__ == "__main__":
-    username, passw, db_name = sys.argv[1], sys.argv[2], sys.argv[3]
-
-    url = {
-        "drivername": "mysql+mysqldb",
-        "host": "localhost",
-        "username": username,
-        "password": passw,
-        "database": db_name,
-    }
-
-    engine = create_engine(URL(**url), pool_pre_ping=True)
+def main(argv):
+    """ main function """
+    engine = create_engine('mysql+mysqldb://{}:{}@localhost/{}'.format(
+                            argv[1], argv[2], argv[3]), pool_pre_ping=True)
     Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    for instance in session.query(State).order_by(asc(State.id)):
+        print(str(instance.id) + ': ' + instance.name)
+    session.close()
 
-    session = Session(bind=engine)
 
-    q = session.query(State).order_by(State.id)
-
-    for instance in q:
-        print("{}: {}".format(instance.id, instance.name))
+if __name__ == '__main__' and len(sys.argv) == 4:
+    main(sys.argv)

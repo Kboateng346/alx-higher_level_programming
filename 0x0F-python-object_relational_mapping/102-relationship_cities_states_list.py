@@ -1,40 +1,23 @@
 #!/usr/bin/python3
-"""
-This script lists all `City` objects from the database `hbtn_0e_101_usa`.
-
-Arguments:
-    mysql username (str)
-    mysql password (str)
-    database name (str)
-"""
-
-import sys
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
-from sqlalchemy.engine.url import URL
-
-from relationship_state import Base
-from relationship_city import City
+""" a script that lists all Cities objects, and their corresponding State
+from the database hbtn_0e_100_usa """
+from sys import argv
+from relationship_state import Base, City
+from sqlalchemy import (create_engine)
+from sqlalchemy.orm import sessionmaker
 
 
-if __name__ == "__main__":
-    username, passw, db_name = sys.argv[1], sys.argv[2], sys.argv[3]
-
-    url = {
-        "drivername": "mysql+mysqldb",
-        "host": "localhost",
-        "username": username,
-        "password": passw,
-        "database": db_name,
-    }
-
-    engine = create_engine(URL(**url), pool_pre_ping=True)
+def main(argv):
+    """ main function """
+    engine = create_engine('mysql+mysqldb://{}:{}@localhost/{}'.format(
+                            argv[1], argv[2], argv[3]), pool_pre_ping=True)
     Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    for c in session.query(City).order_by(City.id.asc()):
+        print(c.id, ': ', c.name, " -> ", c.state.name, sep='')
+    session.close()
 
-    session = Session(bind=engine)
 
-    cities = session.query(City)
-
-    for city in cities:
-        print(f"{city.id}: {city.name} -> {city.state.name}")
+if __name__ == '__main__' and len(argv) == 4:
+    main(argv)
